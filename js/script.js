@@ -8,22 +8,22 @@ function noMatch() {
 function displayMatches(matches) {
   cardWrapper.innerHTML = "";
 
-  if (!matches.length) {
+  if (!matches) {
     noMatch();
-  }
-
-  for (var matchObj of matches) {
-    cardWrapper.insertAdjacentHTML(
-      "beforeend",
-      `
-      <div class="movie-card" style="background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
-      url(${matchObj.movie_image})">
-        <h3>${matchObj.title}</h3>
-        <p>${matchObj.description}</p>
-        <a href="${matchObj.imdb_link}" target="_blank">More Info</a>
-      </div>
-      `
-    );
+  } else {
+    for (var matchObj of matches) {
+      cardWrapper.insertAdjacentHTML(
+        "beforeend",
+        `
+        <div class="movie-card" style="background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
+        url(${matchObj.Poster})">
+          <h3>${matchObj.Title}</h3>
+          <p>${matchObj.Year}</p>
+          <a href="https://www.imdb.com/title/${matchObj.imdbID}/" target="_blank">More Info</a>
+        </div>
+        `
+      );
+    }
   }
 }
 
@@ -32,15 +32,19 @@ function fetchMovies(event) {
   var searchText = searchInput.value.toLowerCase().trim();
 
   if (keyCode === 13 && searchText) {
-    var matches = [];
-    for (var movieObj of movieData) {
-      if (movieObj.title.toLowerCase().includes(searchText)) {
-        matches.push(movieObj);
-      }
+    var responsePromise = fetch(
+      `https://www.omdbapi.com/?apikey=96756e0a&s=${searchText}`
+    );
+
+    function handleResponse(responseObj) {
+      return responseObj.json();
     }
 
-    searchInput.value = "";
-    displayMatches(matches);
+    responsePromise.then(handleResponse).then(function (data) {
+      displayMatches(data.Search);
+
+      searchInput.value = "";
+    });
   }
 }
 
